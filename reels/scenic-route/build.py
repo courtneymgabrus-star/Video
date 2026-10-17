@@ -45,16 +45,17 @@ SCENES = [
          stickers=[dict(k="tag", title="Tampa", sub="est. 2015", tone="pink", x=330, y=170, r=-5),
                    dict(k="flight", x=60, y=430, w=960, h=170),
                    dict(k="chip", text="bachelor's era", tone="paper", x=610, y=480, r=5, line_word=8)]),
-    dict(bg="sunset-palm", lines=["Life had other plans, and that's *okay.*"],
+    dict(bg="icu", bg2="santa-hat", framed=True, lines=["Life had other plans, and that's *okay.*"],
          stickers=[dict(k="burst", text="plot twist!", tone="pink", x=300, y=130, r=-8),
                    dict(k="sparkles", pts=[(160, 220), (920, 180), (880, 520)])]),
-    dict(bg="wings", lines=["At 30 I moved to *Hilton Head* with my mom.",
-                            "Starting over at 30 is *scary.* It's also kind of *magic.*"],
-         stickers=[dict(k="tag", title="Hilton Head", sub="age 30 + mom", tone="teal", x=250, y=160, r=4),
-                   dict(k="burst", text="scary", tone="ink", x=60, y=420, r=-10, size=280, line=1),
-                   dict(k="burst", text="magic", tone="blush", x=720, y=400, r=9, size=300, line=1, line_word=7),
-                   dict(k="sparkles", pts=[(700, 420), (1010, 640), (640, 680), (980, 380)], line=1, line_word=7)]),
-    dict(bg="beanie", lines=["Now I'm a graphic designer and children's book *author.*"],
+    dict(bg="crepe-myrtle", framed=True, lines=["At 30 I moved to *Hilton Head* with my mom."],
+         stickers=[dict(k="tag", title="Hilton Head", sub="age 30 + mom", tone="teal", x=230, y=170, r=4),
+                   dict(k="sparkles", pts=[(140, 200), (960, 470)])]),
+    dict(bg="wings", lines=["Starting over at 30 is *scary.* It's also kind of *magic.*"],
+         stickers=[dict(k="burst", text="scary", tone="ink", x=60, y=180, r=-10, size=300, line_word=5),
+                   dict(k="burst", text="magic", tone="blush", x=700, y=170, r=9, size=320, line_word=10),
+                   dict(k="sparkles", pts=[(680, 200), (1010, 420), (640, 470), (980, 140)], line_word=10)]),
+    dict(bg="beach-books", framed=True, lines=["Now I'm a graphic designer and children's book *author.*"],
          stickers=[dict(k="hello", text="designer + author", x=230, y=140, r=-4),
                    dict(k="sparkles", pts=[(160, 200), (930, 470)])]),
     dict(bg="draper", framed=True,
@@ -69,7 +70,7 @@ SCENES = [
          stickers=[dict(k="chip", text="Life Outside the Lines", tone="teal", x=150, y=170, r=-4),
                    dict(k="heart", text="every kid", x=650, y=250, r=8, line_word=10),
                    dict(k="note", text="founder!", x=170, y=330, r=-8)]),
-    dict(bg="selfie", framed="tall", lines=["And I'm writing my memoir, *One in a Million.*"],
+    dict(bg="portrait", framed="tall", lines=["And I'm writing my memoir, *One in a Million.*"],
          stickers=[dict(k="book", title="One in a Million", sub="a memoir", x=90, y=150, r=-7, line_word=5),
                    dict(k="note", text="coming soon", x=520, y=260, r=6),
                    dict(k="arrow", x=560, y=330, w=240, h=170, r=0),
@@ -249,7 +250,12 @@ for si, sc in enumerate(SCENES):
         tall = sc["framed"] == "tall"
         media = (f'<img class="bg" id="s{si}-bg" src="assets/media/{sc["bg"]}-bg.jpg" alt="">'
                  f'<div class="photo{" tall" if tall else ""}" id="s{si}-photo">'
-                 f'<img src="assets/media/{sc["bg"]}.jpg" alt=""><i class="tape"></i></div>')
+                 f'<img src="assets/media/{sc["bg"]}.jpg" alt="">'
+                 + (f'<img class="ph2" id="s{si}-ph2" src="assets/media/{sc["bg2"]}.jpg" alt="">' if sc.get("bg2") else "")
+                 + '<i class="tape"></i></div>')
+        if sc.get("bg2"):
+            media = (f'<img class="bg" id="s{si}-bgb" src="assets/media/{sc["bg2"]}-bg.jpg" alt="">' + media)
+            media = media.replace(f'<img class="bg" id="s{si}-bg" ', f'<img class="bg" id="s{si}-bg" style="z-index:0" ', 1)
     else:
         media = "".join(
             f'<img class="bg" id="s{si}-bg{j}" src="assets/media/{b}.jpg" alt="">' for j, b in enumerate(bgs))
@@ -269,6 +275,10 @@ for si, sc in enumerate(SCENES):
     if sc.get("framed"):
         js.append(f'tl.fromTo("#s{si}-photo", {{y: 24, rotation: -3}}, {{y: 0, rotation: -1.2, duration: 0.6, ease: "power2.out"}}, {st});')
         js.append(f'tl.fromTo("#s{si}-photo img", {{scale: 1}}, {{scale: 1.05, duration: {dur}, ease: "none"}}, {st});')
+        if sc.get("bg2"):
+            half = round(st + dur / 2, 3)
+            js.append(f'tl.fromTo("#s{si}-ph2", {{opacity: 0}}, {{opacity: 1, duration: 0.5, ease: "power1.inOut"}}, {half});')
+            js.append(f'tl.fromTo("#s{si}-bg", {{opacity: 1}}, {{opacity: 0, duration: 0.5, ease: "power1.inOut"}}, {half});')
     elif len(bgs) == 2:
         half = round(dur / 2, 3)
         js.append(f'tl.fromTo("#s{si}-bg0", {{scale: 1.0}}, {{scale: 1.05, duration: {dur}, ease: "none"}}, {st});')
@@ -375,6 +385,7 @@ body {{ margin: 0; background: var(--ink); }}
   background: var(--paper); border-radius: 8px; box-sizing: border-box;
   box-shadow: 0 24px 60px rgba(70, 52, 30, 0.35), 0 4px 12px rgba(70, 52, 30, 0.25); }}
 .photo.tall {{ left: 230px; width: 620px; height: 1102px; }}
+.photo .ph2 {{ position: absolute; left: 18px; top: 18px; width: calc(100% - 36px); height: calc(100% - 36px); }}
 .photo img {{ display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 3px; }}
 .tape {{ position: absolute; left: 50%; top: -26px; width: 220px; height: 56px; margin-left: -110px;
   background: rgba(168, 220, 196, 0.78); transform: rotate(-4deg);
